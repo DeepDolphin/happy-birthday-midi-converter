@@ -14,6 +14,32 @@ namespace MidiConverter
             var tempoMap = midiFile.GetTempoMap();
 
             List<List<Chord>> tracks = SortChords(chords);
+
+#if DEBUG
+            //output some debug data if necessary
+
+            foreach(List<Chord> track in tracks)
+            {
+                System.Console.WriteLine("--TRACK START--");
+
+                MetricTimeSpan totalTrackTime = new MetricTimeSpan(0);
+                foreach (Chord chord in track)
+                {
+                    MetricTimeSpan chordStartTime = TimeConverter.ConvertTo<MetricTimeSpan>(chord.Time, tempoMap);
+                    MetricTimeSpan chordDuration = LengthConverter.ConvertTo<MetricTimeSpan>(chord.Length, chord.Time, tempoMap);
+                    MetricTimeSpan chordEndTime = chordStartTime + chordDuration;
+
+                    System.Console.WriteLine("start: " + chordStartTime + " end: " + chordEndTime);
+
+                    totalTrackTime += chordDuration;
+                }
+
+                System.Console.WriteLine("--TRACK END--");
+                System.Console.WriteLine("TIME ELAPSED: " + totalTrackTime + "\n\n");
+            }
+
+#else
+            //translate the tracks into code readable by the synth
             string songRepresentation = "{.music_tracks = (struct MusicTrack[]) {\n";
 
             foreach (List<Chord> track in tracks)
@@ -25,11 +51,14 @@ namespace MidiConverter
             songRepresentation += "\n}, .num_tracks = " + tracks.Count + "}";
 
             System.Console.Write(songRepresentation);
+#endif
         }
 
         static string TrackToString(List<Chord> track, TempoMap tempoMap)
         {
             string representation = "\t{.music_chords = (struct MusicChord[]) {\n";
+
+            int num_chords = track.Count;
 
             MetricTimeSpan lastChordEndTime = new MetricTimeSpan(0);
             foreach (Chord chord in track)
@@ -42,6 +71,7 @@ namespace MidiConverter
                 if(lastChordEndTime < chordStartTime)
                 {
                     representation += RestToString(chordStartTime - lastChordEndTime) + ",\n";
+                    num_chords++;
                 }
 
                 //add the chord's string representation
@@ -52,7 +82,7 @@ namespace MidiConverter
                 lastChordEndTime = chordEndTime;
             }
 
-            representation += "\n\t}, .playback_type = PLAYBACK_MONO, .length = " + track.Count + "}";
+            representation += "\n\t}, .playback_type = PLAYBACK_MONO, .length = " + num_chords + "}";
 
             return representation;
         }
