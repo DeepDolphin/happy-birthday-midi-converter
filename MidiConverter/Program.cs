@@ -127,11 +127,11 @@ namespace MidiConverter
         const double INTENSITY_SENSITIVITY = 1.018152;
         const double SUSTAINABILITY = 0.4;
 
-        const double MAX_AD_PERCENT = 0.8;
+        const double MAX_AD_PERCENT = 0.6;
         const double MIN_AD_PERCENT = 0.1;
         const double AD_SLOPE = (MAX_AD_PERCENT - MIN_AD_PERCENT) / (0 - 127);
         const double AD_PROPORTION = 0.2;
-        const double MAX_R_PERCENT = 0.2;
+        const double MAX_R_PERCENT = 0.4;
         const double MIN_R_PERCENT = 0.05;
         const double R_SLOPE = (MAX_R_PERCENT - MIN_R_PERCENT) / (0 - 127);
 
@@ -171,10 +171,10 @@ namespace MidiConverter
             representation += ", .peak_intensity = " + peakIntensity + ", .sustain_intensity = " + sustainIntensity;
 
             //find the adsr envelope
-            double adPercent = AD_SLOPE * (note.Velocity - 127) + MIN_AD_PERCENT;
+            double adPercent = AD_SLOPE * (System.Math.Abs(note.Velocity) - 127) + MIN_AD_PERCENT;
             double aPercent = adPercent * AD_PROPORTION;
             double dPercent = adPercent - aPercent;
-            double rPercent = R_SLOPE * (note.OffVelocity - 127) + MIN_R_PERCENT;
+            double rPercent = R_SLOPE * (System.Math.Abs(note.Velocity) - 127) + MIN_R_PERCENT;
             double sPercent = 1 - aPercent - dPercent - rPercent;
 
             representation += ", .adsr_envelope = (double[]) {" + aPercent + ", " + dPercent + ", " + sPercent + ", " + rPercent + "}";
