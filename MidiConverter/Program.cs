@@ -171,10 +171,10 @@ namespace MidiConverter
             representation += ", .peak_intensity = " + peakIntensity + ", .sustain_intensity = " + sustainIntensity;
 
             //find the adsr envelope
-            double adPercent = AD_SLOPE * note.Velocity + MIN_AD_PERCENT;
+            double adPercent = AD_SLOPE * (note.Velocity - 127) + MIN_AD_PERCENT;
             double aPercent = adPercent * AD_PROPORTION;
             double dPercent = adPercent - aPercent;
-            double rPercent = R_SLOPE * note.OffVelocity + MIN_R_PERCENT;
+            double rPercent = R_SLOPE * (note.OffVelocity - 127) + MIN_R_PERCENT;
             double sPercent = 1 - aPercent - dPercent - rPercent;
 
             representation += ", .adsr_envelope = (double[]) {" + aPercent + ", " + dPercent + ", " + sPercent + ", " + rPercent + "}";
